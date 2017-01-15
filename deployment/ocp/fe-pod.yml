@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: DeploymentConfig
+metadata: 
+
+  name: fe
+  labels: 
+      name: fe
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: fe
+      labels:
+        app: fe      
+    spec:
+      containers: 
+        - env:
+            - name: FE_PORT
+              value: "8080"
+            - name: API_PORT
+              value: "8080"  
+            - name: API_URL
+              value: 'http://api-svc-myproject.192.168.1.108.xip.io/api/v1/'
+          image: mangirdas/ocp-example-fe:v0.5
+          imagePullPolicy: Always
+          name: fe
+          command: ["/bin/fe"]
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              # Path to probe; should be cheap, but representative of typical behavior
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+          livenessProbe:
+            # an http probe
+            httpGet:
+              path: /readiness
+              port: 8080
+            initialDelaySeconds: 20
+            timeoutSeconds: 5

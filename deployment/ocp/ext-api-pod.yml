@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: DeploymentConfig
+metadata: 
+  name: img
+  labels: 
+      name: img
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: img
+      labels:
+        app: img      
+    spec:
+      containers: 
+        - env:
+            - name: API_PORT
+              value: "8080"
+          image: mangirdas/ocp-example-api-ext:v0.5
+          imagePullPolicy: Always
+          name: img
+          command: ["/bin/api"]
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              # Path to probe; should be cheap, but representative of typical behavior
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+          livenessProbe:
+            exec:
+              command:
+              - ping
+              - xkcd.com
+            initialDelaySeconds: 15
+            timeoutSeconds: 1  
+
+            
