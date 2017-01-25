@@ -15,7 +15,7 @@ import (
 	"image/png"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/mangirdaz/ocp-demo/config"
+	"github.com/mangirdaz/ocp-mon-demo/config"
 )
 
 const NotFound = "Not found"

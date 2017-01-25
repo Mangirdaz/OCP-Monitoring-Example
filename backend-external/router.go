@@ -8,7 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
-	"github.com/mangirdaz/ocp-demo/config"
+	"github.com/mangirdaz/ocp-mon-demo/config"
 )
 
 func NewRouter() {
