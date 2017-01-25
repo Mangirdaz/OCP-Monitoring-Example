@@ -10,7 +10,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
-	"github.com/mangirdaz/ocp-demo/config"
+	"github.com/mangirdaz/ocp-mon-demo/config"
 )
 
 //keep order as it is as we use it in json unmarshal. if needed add to bottom

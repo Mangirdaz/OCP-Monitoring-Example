@@ -1,6 +1,6 @@
 package main
 
-import "github.com/mangirdaz/ocp-demo/config"
+import "github.com/mangirdaz/ocp-mon-demo/config"
 
 type KeyValueStorageConfig struct {
 	Ip   string
