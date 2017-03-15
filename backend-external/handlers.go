@@ -1,20 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"image"
-	"image/jpeg"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"image/png"
-
 	log "github.com/Sirupsen/logrus"
+	"github.com/golang/protobuf/proto"
 	"github.com/mangirdaz/ocp-mon-demo/config"
 )
 
@@ -48,46 +44,16 @@ func Index(resp http.ResponseWriter, req *http.Request) {
 	} else {
 		defer req.Body.Close()
 		json.NewDecoder(payload.Body).Decode(&img)
-
-		log.Debugf("Getting image %s", img.Img)
-		response, _ := http.Get(img.Img)
-		defer response.Body.Close()
-		image, _, err := image.Decode(response.Body)
+		imagepb := &config.Image{
+			Url: img.Img,
+			Alt: img.Alt,
+		}
+		out, err := proto.Marshal(imagepb)
 		if err != nil {
-			log.Errorf("Error while decoding %s", img.Img)
-		} else {
-			log.Debugf("Decoding image %s", img.Img)
+			log.Error(err.Error())
 		}
-
-		buffer := new(bytes.Buffer)
-
-		if strings.ContainsAny(img.Img, ".png") {
-
-			if err := png.Encode(buffer, image); err != nil {
-				log.Println("unable to encode image.")
-			}
-
-			resp.Header().Set("Content-Type", "image/png")
-			resp.Header().Set("Content-Length", strconv.Itoa(len(buffer.Bytes())))
-			if _, err := resp.Write(buffer.Bytes()); err != nil {
-				log.Println("unable to write image.")
-			}
-
-		} else {
-
-			if err := jpeg.Encode(buffer, image, nil); err != nil {
-				log.Println("unable to encode image.")
-			}
-
-			resp.Header().Set("Content-Type", "image/jpeg")
-			resp.Header().Set("Content-Length", strconv.Itoa(len(buffer.Bytes())))
-			if _, err := resp.Write(buffer.Bytes()); err != nil {
-				log.Println("unable to write image.")
-			}
-		}
-
+		resp.Write(out)
 	}
-
 }
 
 func random(min, max int) int {

@@ -24,6 +24,11 @@ func NewRouter() {
 
 	apiV1.Methods("GET").Path("").Name("Index").Handler(http.HandlerFunc(mybackendHandler(Index, storage)))
 
+	//images methods
+	img := apiV1.PathPrefix("/image").Subrouter()
+
+	img.Methods("GET").Name("Images").Handler(http.HandlerFunc(GetImage))
+
 	//notes methods
 	notes := apiV1.PathPrefix("/notes").Subrouter()
 

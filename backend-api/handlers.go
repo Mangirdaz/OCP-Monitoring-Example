@@ -1,14 +1,20 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/mux"
 	"github.com/mangirdaz/ocp-mon-demo/config"
 )
@@ -97,6 +103,55 @@ func checkPass(user, pass string) bool {
 		return false
 	}
 	return false
+}
+
+func GetImage(resp http.ResponseWriter, req *http.Request) {
+	log.Debug("Get image")
+	//change with grpc
+	re, err := http.Get("http://localhost:8001/api/v1/img")
+	if err != nil {
+		log.Errorf("Error: %s", err)
+		response(nil, true, err, resp, req)
+	}
+	out, err := ioutil.ReadAll(re.Body)
+	img := &config.Image{}
+	if err := proto.Unmarshal(out, img); err != nil {
+		log.Fatalln("Failed to parse address book:", err)
+	}
+
+	log.Debug(re.Body)
+
+	//get the image itself as a buffer
+	buffer := new(bytes.Buffer)
+	response, _ := http.Get(img.Url)
+	defer response.Body.Close()
+	image, _, err := image.Decode(response.Body)
+
+	if strings.ContainsAny(img.Url, ".png") {
+
+		if err := png.Encode(buffer, image); err != nil {
+			log.Println("unable to encode image.")
+		}
+
+		resp.Header().Set("Content-Type", "image/png")
+		resp.Header().Set("Content-Length", strconv.Itoa(len(buffer.Bytes())))
+		if _, err := resp.Write(buffer.Bytes()); err != nil {
+			log.Println("unable to write image.")
+		}
+
+	} else {
+
+		if err := jpeg.Encode(buffer, image, nil); err != nil {
+			log.Println("unable to encode image.")
+		}
+
+		resp.Header().Set("Content-Type", "image/jpeg")
+		resp.Header().Set("Content-Length", strconv.Itoa(len(buffer.Bytes())))
+		if _, err := resp.Write(buffer.Bytes()); err != nil {
+			log.Println("unable to write image.")
+		}
+	}
+
 }
 
 //GetNotes returns all notes

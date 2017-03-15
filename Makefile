@@ -1,6 +1,9 @@
 test:
 	go test -v `go list ./... | egrep -v /vendor/`
 
+proto:
+	cd config/ && protoc -I=./ --go_out=./ proto.proto
+
 build-api: 
 	cd backend-api/ && CGO_ENABLED=0 GOOS=linux go build -o api .
 
@@ -18,8 +21,9 @@ build-ui:
 run-api: build-api
 	./backend-api/api
 
-run-api-ext: build-api-ext
-	./backend-external/api			
+run-api-ext: export API_PORT=8001
+run-api-ext: build-api-ext 
+	./backend-external/api		
 	
 run-api-mon: build-api-mon
 	./backend-api-monitor/api	
